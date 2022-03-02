@@ -7,13 +7,13 @@ import (
 )
 
 var (
-	Cfg *ini.File
-	RunMode string
-	HTTPPort int
-	ReadTimeout time.Duration
+	Cfg          *ini.File
+	RunMode      string
+	HTTPPort     int
+	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 
-	PageSize int
+	PageSize  int
 	JwtSecret string
 )
 
@@ -25,6 +25,7 @@ func init() {
 	}
 	LoadBase()
 	LoadServer()
+	LoadApp()
 }
 
 func LoadBase() {
@@ -39,7 +40,7 @@ func LoadServer() {
 
 	HTTPPort = section.Key("HTTP_PORT").MustInt(8000)
 	ReadTimeout = time.Duration(section.Key("READ_TIMEOUT").MustInt(60)) * time.Second
-	WriteTimeout = time.Duration(section.Key("").MustInt(60)) * time.Second
+	WriteTimeout = time.Duration(section.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
 }
 
 func LoadApp() {
