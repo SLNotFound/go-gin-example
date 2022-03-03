@@ -1,5 +1,10 @@
 package models
 
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
+
 // Tag 创建一个Tag结构体
 type Tag struct {
 	Model
@@ -28,6 +33,14 @@ func ExistTagByName(name string) bool {
 	}
 	return false
 }
+func ExistTagByID(id int) bool {
+	var tag Tag
+	db.Select("id").Where("id = ?", id).First(&tag)
+	if tag.ID > 0 {
+		return true
+	}
+	return false
+}
 
 func AddTag(name string, state int, createBy string) bool {
 	db.Create(&Tag{
@@ -35,5 +48,25 @@ func AddTag(name string, state int, createBy string) bool {
 		State:     state,
 		CreatedBy: createBy,
 	})
+	return true
+}
+
+func (tag *Tag) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("CreatedOn", time.Now().Unix())
+	return nil
+}
+
+func (tag *Tag) BeforeUpdate(scope *gorm.Scope) error {
+	scope.SetColumn("ModifiedOn", time.Now().Unix())
+	return nil
+}
+
+func EditTag(id int, data interface{}) bool {
+	db.Model(&Tag{}).Where("id = ?", id).Updates(data)
+	return true
+}
+
+func DeleteTag(id int) bool {
+	db.Where("id = ?", id).Delete(&Tag{})
 	return true
 }
