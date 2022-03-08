@@ -29,12 +29,25 @@ const (
 	FATAL
 )
 
-func init() {
-	filePath := getLogFileFullPath()
-	F = openLogFile(filePath)
+func Setup() {
+	//var err error
+	filePath := getLogFilePath()
+	fileName := getLogFilename()
+	F = openLogFile(filePath + fileName)
+
+	//if err != nil {
+	//	log.Fatalf("logging.Setup err: %v", err)
+	//}
 
 	logger = log.New(F, DefaultPrefix, log.LstdFlags)
 }
+
+//func init() {
+//	filePath := getLogFileFullPath()
+//	F = openLogFile(filePath)
+//
+//	logger = log.New(F, DefaultPrefix, log.LstdFlags)
+//}
 
 func Debug(v ...interface{}) {
 	setPrefix(DEBUG)

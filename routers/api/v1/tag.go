@@ -38,7 +38,7 @@ func GetTags(c *gin.Context) {
 	code := e.SUCCESS
 
 	// util.GetPage 保证各接口的page处理是一致的
-	data["lists"] = models.GetTags(util.GetPage(c), setting.PageSize, maps)
+	data["lists"] = models.GetTags(util.GetPage(c), setting.AppSetting.PageSize, maps)
 	data["total"] = models.GetTagsTotal(maps)
 
 	c.JSON(http.StatusOK, gin.H{

@@ -18,42 +18,66 @@ type Model struct {
 	DeletedOn  int `json:"deleted_on"`
 }
 
-func init() {
-	var (
-		err                                               error
-		dbType, dbName, user, password, host, tablePrefix string
-	)
-
-	section, err := setting.Cfg.GetSection("database")
+// SetUp替换init
+func Setup() {
+	var err error
+	db, err = gorm.Open(setting.DatabaseSetting.Type, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parse",
+		setting.DatabaseSetting.User,
+		setting.DatabaseSetting.Password,
+		setting.DatabaseSetting.Host,
+		setting.DatabaseSetting.Name))
 	if err != nil {
-		log.Fatal(2, "Fail to get section 'database': %v", err)
-	}
-
-	dbType = section.Key("TYPE").String()
-	dbName = section.Key("NAME").String()
-	user = section.Key("USER").String()
-	password = section.Key("PASSWORD").String()
-	host = section.Key("HOST").String()
-	tablePrefix = section.Key("TABLE_PREFIX").String()
-
-	db, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parse", user, password, host, dbName))
-	if err != nil {
-		log.Println(err)
+		log.Fatalf("models.Setup err: %v", err)
 	}
 
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return tablePrefix + defaultTableName
+		return setting.DatabaseSetting.TablePrefix + defaultTableName
 	}
-	db.SingularTable(true)
-	db.LogMode(true)
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
 
-	// 注册Callbacks
+	db.SingularTable(true)
 	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
 	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
 	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(100)
 }
+
+//func init() {
+//	var (
+//		err                                               error
+//		dbType, dbName, user, password, host, tablePrefix string
+//	)
+//
+//	section, err := setting.Cfg.GetSection("database")
+//	if err != nil {
+//		log.Fatal(2, "Fail to get section 'database': %v", err)
+//	}
+//
+//	dbType = section.Key("TYPE").String()
+//	dbName = section.Key("NAME").String()
+//	user = section.Key("USER").String()
+//	password = section.Key("PASSWORD").String()
+//	host = section.Key("HOST").String()
+//	tablePrefix = section.Key("TABLE_PREFIX").String()
+//
+//	db, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parse", user, password, host, dbName))
+//	if err != nil {
+//		log.Println(err)
+//	}
+//
+//	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+//		return tablePrefix + defaultTableName
+//	}
+//	db.SingularTable(true)
+//	db.LogMode(true)
+//	db.DB().SetMaxIdleConns(10)
+//	db.DB().SetMaxOpenConns(100)
+//
+//	// 注册Callbacks
+//	db.Callback().Create().Replace("gorm:update_time_stamp", updateTimeStampForCreateCallback)
+//	db.Callback().Update().Replace("gorm:update_time_stamp", updateTimeStampForUpdateCallback)
+//	db.Callback().Delete().Replace("gorm:delete", deleteCallback)
+//}
 
 func CloseDB() {
 	defer db.Close()
