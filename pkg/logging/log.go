@@ -30,10 +30,13 @@ const (
 )
 
 func Setup() {
-	//var err error
+	var err error
 	filePath := getLogFilePath()
 	fileName := getLogFilename()
-	F = openLogFile(filePath + fileName)
+	F, err = openLogFile(fileName, filePath)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	//if err != nil {
 	//	log.Fatalf("logging.Setup err: %v", err)
