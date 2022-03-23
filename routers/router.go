@@ -7,8 +7,10 @@ import (
 	_ "go-gin-example/docs"
 	"go-gin-example/middleware/jwt"
 	"go-gin-example/pkg/setting"
+	"go-gin-example/pkg/upload"
 	"go-gin-example/routers/api"
 	v1 "go-gin-example/routers/api/v1"
+	"net/http"
 )
 
 func InitRouter() *gin.Engine {
@@ -16,6 +18,8 @@ func InitRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	gin.SetMode(setting.ServerSetting.RunMode)
+
+	r.StaticFS("/upload/images", http.Dir(upload.GetImageFullPath()))
 
 	r.GET("/auth", api.GetAuth)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
