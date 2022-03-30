@@ -26,7 +26,7 @@ func SetUp() error {
 				}
 			}
 
-			return nil, err
+			return c, err
 		},
 
 		TestOnBorrow: func(c redis.Conn, t time.Time) error {
